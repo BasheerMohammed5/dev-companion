@@ -1,0 +1,1552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevCompanion Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #090d16 0%, #111827 50%, #1e1b4b 100%);
+            --glass-bg: rgba(17, 24, 39, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --accent-cyan: #06b6d4;
+            --accent-indigo: #6366f1;
+            --accent-green: #10b981;
+            --accent-yellow: #f59e0b;
+            --accent-rose: #f43f5e;
+            --text-primary: #f3f4f6;
+            --text-secondary: #9ca3af;
+            --card-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            --console-bg: #070913;
+            --console-output-bg: rgba(0, 0, 0, 0.4);
+            --score-circle-inner: #0d1220;
+            --header-bg: rgba(15, 23, 42, 0.3);
+            --tab-content-bg: rgba(0, 0, 0, 0.2);
+            --pre-bg: rgba(0,0,0,0.4);
+            --pre-color: #a7f3d0;
+            --code-bg: rgba(255,255,255,0.06);
+            --text-shadow: 0 0 10px rgba(6, 182, 212, 0.5);
+        }
+
+        [data-theme="light"] {
+            --bg-gradient: linear-gradient(135deg, #f1f5f9 0%, #cbd5e1 50%, #94a3b8 100%);
+            --glass-bg: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(15, 23, 42, 0.08);
+            --accent-cyan: #0891b2;
+            --accent-indigo: #4f46e5;
+            --accent-green: #059669;
+            --accent-yellow: #d97706;
+            --accent-rose: #e11d48;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --card-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.06);
+            --console-bg: #ffffff;
+            --console-output-bg: #f8fafc;
+            --score-circle-inner: #ffffff;
+            --header-bg: rgba(255, 255, 255, 0.5);
+            --tab-content-bg: #f1f5f9;
+            --pre-bg: #e2e8f0;
+            --pre-color: #047857;
+            --code-bg: rgba(0, 0, 0, 0.05);
+            --text-shadow: none;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        body[dir="rtl"] {
+            font-family: 'Cairo', sans-serif;
+        }
+
+        /* Glass Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.02);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 40px;
+            background: var(--header-bg);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--glass-border);
+            z-index: 10;
+            transition: background 0.3s;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            font-size: 28px;
+            animation: pulse-glow 2s infinite alternate;
+        }
+
+        h1 {
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            background: linear-gradient(to right, #06b6d4, #6366f1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 14px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent-rose);
+            box-shadow: 0 0 10px var(--accent-rose);
+        }
+
+        .status-dot.connected {
+            background: var(--accent-green);
+            box-shadow: 0 0 10px var(--accent-green);
+            animation: pulse-glow-green 1.5s infinite;
+        }
+
+        .main-container {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            flex-grow: 1;
+            padding: 30px 40px;
+            gap: 30px;
+            max-width: 1800px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        /* Sidebar Glass Panel */
+        .sidebar {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            box-shadow: var(--card-shadow);
+            max-height: calc(100vh - 140px);
+            overflow-y: auto;
+        }
+
+        .sidebar-section-title {
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--accent-cyan);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding-bottom: 8px;
+            margin-bottom: 12px;
+        }
+
+        .project-info-card {
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 12px;
+            padding: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        .project-info-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+
+        .project-info-value {
+            font-size: 14px;
+            font-weight: 500;
+            word-break: break-all;
+            font-family: 'Fira Code', monospace;
+        }
+
+        .feature-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .feature-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.02);
+            padding: 12px 16px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            transition: all 0.3s ease;
+        }
+
+        .feature-item:hover {
+            border-color: rgba(6, 182, 212, 0.2);
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .feature-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            max-width: 80%;
+        }
+
+        .feature-name {
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .feature-desc {
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        /* Premium Switch */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255, 255, 255, 0.1);
+            transition: .3s;
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .3s;
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        input:checked + .slider {
+            background-color: var(--accent-cyan);
+            box-shadow: 0 0 8px rgba(6, 182, 212, 0.5);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(20px);
+        }
+
+        body[dir="rtl"] .slider:before {
+            left: auto;
+            right: 3px;
+        }
+
+        body[dir="rtl"] input:checked + .slider:before {
+            transform: translateX(-20px);
+        }
+
+        /* Content Area */
+        .content-area {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            min-width: 0; /* Prevents grid layout blowout */
+        }
+
+        /* Grid of Cards */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: 2fr 3fr;
+            gap: 30px;
+        }
+
+        .card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: var(--card-shadow);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .action-btn {
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-indigo));
+            border: none;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(99, 102, 241, 0.4);
+        }
+
+        .action-btn:active {
+            transform: translateY(0);
+        }
+
+        /* Score Display */
+        .score-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            padding: 10px 0;
+        }
+
+        .score-circle {
+            position: relative;
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            background: conic-gradient(var(--accent-cyan) 0deg, var(--accent-indigo) 0deg, rgba(255,255,255,0.05) 0deg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+            transition: background 1s ease;
+        }
+
+        .score-circle::before {
+            content: "";
+            position: absolute;
+            width: 116px;
+            height: 116px;
+            border-radius: 50%;
+            background: var(--score-circle-inner);
+            transition: background 0.3s;
+        }
+
+        .score-value {
+            position: relative;
+            font-size: 38px;
+            font-weight: 800;
+            color: var(--text-primary);
+            text-shadow: var(--text-shadow);
+        }
+
+        .score-meta-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .score-meta-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 180px;
+            background: rgba(255, 255, 255, 0.02);
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+        }
+
+        .score-meta-name {
+            color: var(--text-secondary);
+        }
+
+        .score-meta-val {
+            font-weight: 600;
+            color: var(--accent-cyan);
+        }
+
+        /* Heatmap Visualizer */
+        .heatmap-container {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            padding: 10px 0;
+        }
+
+        .heatmap-bar-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .heatmap-label-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .heatmap-layer-name {
+            color: var(--text-secondary);
+        }
+
+        .heatmap-layer-score {
+            font-family: 'Fira Code', monospace;
+        }
+
+        .heatmap-bar-bg {
+            height: 14px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 7px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            position: relative;
+        }
+
+        .heatmap-bar-fill {
+            height: 100%;
+            border-radius: 7px;
+            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-indigo));
+            width: 0%;
+            transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .heatmap-bar-fill.warning {
+            background: linear-gradient(90deg, var(--accent-yellow), #f59e0b);
+        }
+
+        .heatmap-bar-fill.danger {
+            background: linear-gradient(90deg, var(--accent-rose), #ef4444);
+        }
+
+        /* Tabbed Code Violations Panel */
+        .violations-card {
+            flex-grow: 1;
+            min-height: 350px;
+        }
+
+        .tabs-header {
+            display: flex;
+            gap: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding-bottom: 10px;
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            padding: 6px 16px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn.active {
+            color: white;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+        }
+
+        .tab-content {
+            flex-grow: 1;
+            overflow-y: auto;
+            max-height: 400px;
+            background: var(--tab-content-bg);
+            border-radius: 8px;
+            padding: 16px;
+            font-size: 13px;
+            line-height: 1.6;
+            border: 1px solid var(--glass-border);
+            transition: background 0.3s;
+        }
+
+        .tab-content-md {
+            font-family: inherit;
+            color: var(--text-primary);
+        }
+
+        .tab-content-md pre {
+            background: var(--pre-bg);
+            color: var(--pre-color);
+            padding: 12px;
+            border-radius: 6px;
+            font-family: 'Fira Code', monospace;
+            overflow-x: auto;
+            margin: 12px 0;
+            border: 1px solid var(--glass-border);
+        }
+
+        .tab-content-md code {
+            font-family: 'Fira Code', monospace;
+            background: var(--code-bg);
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: var(--accent-cyan);
+        }
+
+        .tab-content-md blockquote {
+            border-inline-start: 4px solid var(--accent-indigo);
+            background: rgba(99, 102, 241, 0.04);
+            padding: 10px 16px;
+            border-radius: 8px;
+            margin: 12px 0;
+        }
+
+        .tab-content-md h1, .tab-content-md h2, .tab-content-md h3 {
+            margin: 16px 0 8px 0;
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .tab-content-md ul, .tab-content-md ol {
+            margin-left: 20px;
+            margin-bottom: 12px;
+        }
+
+        /* Live Terminal Console Card */
+        .console-card {
+            background: var(--console-bg);
+            border: 1px solid var(--glass-border);
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.3), var(--card-shadow);
+            transition: background 0.3s;
+        }
+
+        .console-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .console-badge {
+            font-family: 'Fira Code', monospace;
+            font-size: 11px;
+            background: rgba(6, 182, 212, 0.1);
+            color: var(--accent-cyan);
+            border: 1px solid rgba(6, 182, 212, 0.2);
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        .console-clear-btn {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.1);
+            color: var(--text-secondary);
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .console-clear-btn:hover {
+            color: white;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .console-output {
+            background: var(--console-output-bg);
+            border-radius: 8px;
+            border: 1px solid var(--glass-border);
+            height: 300px;
+            font-family: 'Fira Code', monospace;
+            font-size: 12px;
+            padding: 16px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            box-shadow: inset 0 2px 8px rgba(0,0,0,0.6);
+        }
+
+        .log-line {
+            display: flex;
+            gap: 8px;
+            line-height: 1.5;
+            word-break: break-all;
+            animation: fade-in 0.2s ease;
+        }
+
+        .log-time {
+            color: #4b5563;
+            flex-shrink: 0;
+        }
+
+        .log-time-sys {
+            color: #6366f1;
+            flex-shrink: 0;
+        }
+
+        .log-level {
+            font-weight: 700;
+            flex-shrink: 0;
+            width: 55px;
+        }
+
+        .log-level.info { color: var(--accent-cyan); }
+        .log-level.warn { color: var(--accent-yellow); }
+        .log-level.error { color: var(--accent-rose); }
+        .log-level.success { color: var(--accent-green); }
+
+        .log-msg {
+            color: #d1d5db;
+        }
+
+        /* Animations */
+        @keyframes pulse-glow {
+            from {
+                text-shadow: 0 0 10px rgba(6, 182, 212, 0.5);
+            }
+            to {
+                text-shadow: 0 0 20px rgba(99, 102, 241, 0.8), 0 0 30px rgba(99, 102, 241, 0.4);
+            }
+        }
+
+        @keyframes pulse-glow-green {
+            0% {
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 8px rgba(16, 185, 129, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+            }
+        }
+
+        @keyframes fade-in {
+            from {
+                opacity: 0;
+                transform: translateY(4px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive Layout */
+        @media(max-width: 1200px) {
+            .main-container {
+                grid-template-columns: 1fr;
+            }
+            .sidebar {
+                max-height: none;
+            }
+        }
+        @media(max-width: 768px) {
+            .metrics-grid {
+                grid-template-columns: 1fr;
+            }
+            header {
+                padding: 15px 20px;
+            }
+            .main-container {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-section">
+            <span class="logo-icon">⚡</span>
+            <h1 id="headerTitle">DEVCOMPANION CONTROL CENTER</h1>
+        </div>
+        <div style="display: flex; align-items: center; gap: 16px;">
+            <button id="langToggleBtn" onclick="toggleLanguage()" class="action-btn" style="background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); box-shadow: none; padding: 6px 12px; font-weight: 600; cursor: pointer; color: var(--text-primary);">🌐 EN</button>
+            <button id="themeToggleBtn" onclick="toggleTheme()" class="action-btn" style="background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); box-shadow: none; padding: 6px 12px; font-size: 16px; cursor: pointer; color: var(--text-primary);">🌙</button>
+            <div class="status-badge">
+                <div id="statusDot" class="status-dot"></div>
+                <span id="statusText">Disconnected</span>
+            </div>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <!-- Left Sidebar Options -->
+        <aside class="sidebar">
+            <div>
+                <div id="lblActiveProject" class="sidebar-section-title">Active Project</div>
+                <div class="project-info-card">
+                    <div id="lblCurrentFolder" class="project-info-label">Current Folder</div>
+                    <div id="projectPath" class="project-info-value">Loading...</div>
+                </div>
+            </div>
+
+            <div>
+                <div id="lblServicesSettings" class="sidebar-section-title">Services Settings</div>
+                <div id="featuresContainer" class="feature-list">
+                    <!-- Loaded dynamically -->
+                    <div id="lblReadingFeatures" style="text-align: center; color: var(--text-secondary); font-size: 13px; padding: 20px;">
+                        Reading features configurations...
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Display Content Area -->
+        <main class="content-area">
+            <!-- Metrics Row (Scorecard & Heatmap) -->
+            <section class="metrics-grid">
+                <!-- Scorecard Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <div id="lblArchScoreTitle" class="card-title">📊 Architectural Quality Score</div>
+                        <button id="recalcScoreBtn" class="action-btn">Re-evaluate</button>
+                    </div>
+                    <div class="score-container">
+                        <div id="scoreCircle" class="score-circle">
+                            <span id="scoreValue" class="score-value">--</span>
+                        </div>
+                        <div class="score-meta-list">
+                            <div class="score-meta-item">
+                                <span id="lblBoundaryViolations" class="score-meta-name">Boundary violations</span>
+                                <span id="valViolations" class="score-meta-val">--</span>
+                            </div>
+                            <div class="score-meta-item">
+                                <span id="lblInterfacesRatio" class="score-meta-name">Interfaces Ratio</span>
+                                <span id="valInterfaces" class="score-meta-val">--</span>
+                            </div>
+                            <div class="score-meta-item">
+                                <span id="lblComplexityIndex" class="score-meta-name">Complexity Index</span>
+                                <span id="valComplexity" class="score-meta-val">--</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Heatmap Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <div id="lblTechDebtTitle" class="card-title">🔥 Technical Debt Heatmap</div>
+                    </div>
+                    <div id="heatmapContainer" class="heatmap-container">
+                        <!-- Loaded dynamically -->
+                        <div id="lblDebtDescription" style="text-align: center; color: var(--text-secondary); font-size: 13px; padding: 30px;">
+                            Trigger "Re-evaluate" to compute Technical Debt metrics.
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Violations Viewer -->
+            <section class="card violations-card">
+                <div class="card-header">
+                    <div id="lblReviewsAuditsTitle" class="card-title">⚠️ Code Reviews & Architecture Audits</div>
+                    <button id="repairBtn" class="action-btn">Trigger Autonomous Repair</button>
+                </div>
+                <div class="tabs-header">
+                    <button id="tabBtnAudit" class="tab-btn active" onclick="switchTab('audit')">Project Audit Report</button>
+                    <button id="tabBtnErrors" class="tab-btn" onclick="switchTab('errors')">Active Code Violations</button>
+                    <button id="tabBtnMemory" class="tab-btn" onclick="switchTab('memory')">AI Custom Context Rules</button>
+                    <button id="tabBtnHistory" class="tab-btn" onclick="switchTab('history')">Modifications Logs</button>
+                </div>
+                <div id="tabContent" class="tab-content">
+                    <div id="markdownOutput" class="tab-content-md">
+                        Please wait. Loading project documents...
+                    </div>
+                </div>
+            </section>
+
+            <!-- Live Logs Console -->
+            <section class="card console-card">
+                <div class="card-header">
+                    <div id="lblLogStreamTitle" class="card-title">📟 Live Terminal Log Stream</div>
+                    <div class="console-controls">
+                        <span id="lblSseStream" class="console-badge">SSE STREAM</span>
+                        <button id="clearConsoleBtn" class="console-clear-btn">Clear</button>
+                    </div>
+                </div>
+                <div id="consoleOutput" class="console-output">
+                    <div class="log-line">
+                        <span class="log-time-sys">[System]</span>
+                        <span class="log-level info">INFO</span>
+                        <span id="lblConsoleReady" class="log-msg">Console ready. Establishing live socket hook...</span>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        const API_BASE = window.location.origin;
+        let socket;
+        let activeTab = 'audit';
+        let statusData = null;
+        let currentLang = localStorage.getItem('lang') || 'en';
+        let currentTheme = localStorage.getItem('theme') || 'dark';
+
+        const translations = {
+            en: {
+                title: "DEVCOMPANION CONTROL CENTER",
+                disconnected: "Disconnected",
+                connected: "Live Feed Connected",
+                activeProject: "Active Project",
+                currentFolder: "Current Folder",
+                loading: "Loading...",
+                servicesSettings: "Services Settings",
+                readingFeatures: "Reading features configurations...",
+                archScoreTitle: "📊 Architectural Quality Score",
+                reevaluate: "Re-evaluate",
+                reevaluating: "Calculating...",
+                violations: "Boundary violations",
+                interfaces: "Interfaces Ratio",
+                complexity: "Complexity Index",
+                techDebtTitle: "🔥 Technical Debt Heatmap",
+                debtDescription: "Trigger 'Re-evaluate' to compute Technical Debt metrics.",
+                reviewsAuditsTitle: "⚠️ Code Reviews & Architecture Audits",
+                triggerRepair: "Trigger Autonomous Repair",
+                repairing: "Repairing...",
+                tabAudit: "Project Audit Report",
+                tabErrors: "Active Code Violations",
+                tabMemory: "AI Custom Context Rules",
+                tabHistory: "Modifications Logs",
+                logStreamTitle: "📟 Live Terminal Log Stream",
+                sseStream: "SSE STREAM",
+                clear: "Clear",
+                noViolations: "No active code violations detected. Looking clean and healthy!",
+                applying: "Applying...",
+                applyProposedFix: "🔧 Apply Proposed Fix",
+                proposedCsFix: "Proposed C# Fix:",
+                issueLabel: "Issue:",
+                promptScorecardInfo: "Calculating latest codebase metric scorecard...",
+                promptScorecardSuccess: "Codebase re-evaluated. Final Score: {score}/100.",
+                promptScorecardError: "Re-evaluation failed: {err}",
+                promptRepairInfo: "Launching Autonomous Repair engine in background...",
+                promptRepairSuccess: "Autonomous Repair engine executed. Check terminal logs for compile results!",
+                promptRepairError: "Failed to execute repair: {err}",
+                confirmRepair: "Are you sure you want to trigger Autonomous Repair? This will compile the code, patch build errors, and commit changes if validated.",
+                confirmFix: "Are you sure you want to apply the proposed C# fix to {file}?",
+                fixApplied: "Fix successfully applied to {file}!",
+                fixFailed: "Failed to apply fix: {err}"
+            },
+            ar: {
+                title: "مركز تحكم DEVCOMPANION",
+                disconnected: "غير متصل",
+                connected: "متصل بالبث المباشر",
+                activeProject: "المشروع النشط",
+                currentFolder: "المجلد الحالي",
+                loading: "جاري التحميل...",
+                servicesSettings: "إعدادات الخدمات",
+                readingFeatures: "جاري قراءة إعدادات الخدمات...",
+                archScoreTitle: "📊 نقاط الجودة المعمارية",
+                reevaluate: "إعادة تقييم",
+                reevaluating: "جاري الحساب...",
+                violations: "انتهاكات الحدود",
+                interfaces: "نسبة الواجهات",
+                complexity: "مؤشر التعقيد",
+                techDebtTitle: "🔥 خريطة الديون التقنية",
+                debtDescription: "اضغط على 'إعادة تقييم' لحساب مقاييس الديون التقنية.",
+                reviewsAuditsTitle: "⚠️ مراجعات الأكواد والتدقيق المعماري",
+                triggerRepair: "تشغيل الإصلاح التلقائي",
+                repairing: "جاري الإصلاح...",
+                tabAudit: "تقرير تدقيق المشروع",
+                tabErrors: "انتهاكات الأكواد النشطة",
+                tabMemory: "قواعد السياق المخصصة للذكاء الاصطناعي",
+                tabHistory: "سجلات التعديلات",
+                logStreamTitle: "📟 بث سجلات الطرفية الحية",
+                sseStream: "بث SSE",
+                clear: "مسح",
+                noViolations: "لم يتم اكتشاف أي انتهاكات في الأكواد. يبدو الكود نظيفاً وصحياً!",
+                applying: "جاري التطبيق...",
+                applyProposedFix: "🔧 تطبيق الإصلاح المقترح",
+                proposedCsFix: "إصلاح C# المقترح:",
+                issueLabel: "المشكلة:",
+                promptScorecardInfo: "جاري حساب نقاط جودة معمارية الكود الحالي...",
+                promptScorecardSuccess: "تم إعادة تقييم كود المشروع. النقاط النهائية: {score}/100.",
+                promptScorecardError: "فشلت عملية إعادة التقييم: {err}",
+                promptRepairInfo: "جاري تشغيل محرك الإصلاح التلقائي في الخلفية...",
+                promptRepairSuccess: "تم تشغيل محرك الإصلاح التلقائي. افحص سجلات الطرفية لمعرفة نتائج البناء!",
+                promptRepairError: "فشل تشغيل محرك الإصلاح: {err}",
+                confirmRepair: "هل أنت متأكد من رغبتك في تشغيل الإصلاح التلقائي؟ سيقوم هذا ببناء المشروع وإصلاح أخطاء الترجمة وحفظ التغييرات إذا تمت الموافقة عليها.",
+                confirmFix: "هل أنت متأكد من رغبتك في تطبيق إصلاح C# المقترح على {file}؟",
+                fixApplied: "تم تطبيق الإصلاح بنجاح على {file}!",
+                fixFailed: "فشل تطبيق الإصلاح: {err}"
+            }
+        };
+
+        const featureDetails = {
+            en: {
+                1: { name: "Live Code Review", desc: "Monitors edits and audits code quality on save." },
+                2: { name: "Startup Project Audit", desc: "Generates Clean Architecture audits on start." },
+                3: { name: "API Shadow Testing", desc: "Monitors Swagger definition changes." },
+                4: { name: "Architecture Drift", desc: "Checks boundaries using namespaces." },
+                5: { name: "AI Root Cause Engine", desc: "Analyzes stack traces and Registration trees." },
+                6: { name: "Debt Heatmap Generator", desc: "Computes layer debt metrics." },
+                7: { name: "AI Memory & Context", desc: "Matches code with rules in .ai/context.json." },
+                8: { name: "Technical Scorecard", desc: "Calculates total boundary scorecard." },
+                9: { name: "Autonomous Repair Mode", desc: "Applies patches to compile errors." },
+                10: { name: "Knowledge Graph Builder", desc: "Builds dependency graph of assemblies." },
+                11: { name: "Conversation with History", desc: "Q&A with git commits logs." }
+            },
+            ar: {
+                1: { name: "مراجعة الكود الحية", desc: "مراقبة التعديلات وفحص جودة الكود عند الحفظ." },
+                2: { name: "تدقيق بدء المشروع", desc: "توليد تقارير الـ Clean Architecture عند تشغيل النظام." },
+                3: { name: "اختبارات الـ API الوهمية", desc: "مراقبة التغييرات في تعريفات Swagger وفحصها." },
+                4: { name: "انحراف المعمارية", desc: "التحقق من حدود الطبقات باستخدام الـ namespaces." },
+                5: { name: "محرك الأخطاء الذكي", desc: "تحليل سجلات الأخطاء وشجرة الـ DI لإيجاد المشكلة." },
+                6: { name: "خريطة الديون التقنية", desc: "حساب ديون الطبقات البرمجية المختلفة." },
+                7: { name: "سياق وذاكرة الذكاء الاصطناعي", desc: "مطابقة الأكواد مع القواعد في .ai/context.json." },
+                8: { name: "لوحة النقاط الفنية", desc: "حساب إجمالي نقاط حدود جودة الكود معمارياً." },
+                9: { name: "نمط الإصلاح التلقائي الذاتي", desc: "تطبيق التعديلات البرمجية لحل أخطاء البناء." },
+                10: { name: "منشئ مخطط المعرفة", desc: "بناء رسم بياني لعلاقات الاعتمادية بين ملفات المشروع." },
+                11: { name: "محادثة مع سجل التغييرات", desc: "سؤال المساعد وجوابه بناءً على سجل الـ Git Commits." }
+            }
+        };
+
+        // Initialize Page
+        window.addEventListener('DOMContentLoaded', () => {
+            applyTheme();
+            applyLanguage();
+            initWebSocket();
+            fetchStatus();
+
+            document.getElementById('recalcScoreBtn').addEventListener('click', recalculateScore);
+            document.getElementById('repairBtn').addEventListener('click', triggerRepair);
+            document.getElementById('clearConsoleBtn').addEventListener('click', () => {
+                document.getElementById('consoleOutput').innerHTML = '';
+            });
+        });
+
+        // Toggle Theme
+        function toggleTheme() {
+            currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            localStorage.setItem('theme', currentTheme);
+            applyTheme();
+        }
+
+        function applyTheme() {
+            document.documentElement.setAttribute('data-theme', currentTheme);
+            document.getElementById('themeToggleBtn').innerText = currentTheme === 'dark' ? '☀️' : '🌙';
+        }
+
+        // Toggle Language
+        function toggleLanguage() {
+            currentLang = currentLang === 'en' ? 'ar' : 'en';
+            localStorage.setItem('lang', currentLang);
+            applyLanguage();
+            if (statusData) {
+                renderFeatureSwitches(statusData.activeFeatures);
+                renderScorecard(statusData.scorecard);
+                renderHeatmap(statusData.heatmap);
+                renderTabContent();
+            }
+        }
+
+        function applyLanguage() {
+            const t = translations[currentLang];
+            document.body.setAttribute('dir', currentLang === 'ar' ? 'rtl' : 'ltr');
+            document.documentElement.setAttribute('lang', currentLang);
+
+            document.getElementById('langToggleBtn').innerText = currentLang === 'en' ? '🌐 AR' : '🌐 EN';
+            document.getElementById('headerTitle').innerText = t.title;
+            document.getElementById('lblActiveProject').innerText = t.activeProject;
+            document.getElementById('lblCurrentFolder').innerText = t.currentFolder;
+            document.getElementById('lblServicesSettings').innerText = t.servicesSettings;
+            
+            const featuresReading = document.getElementById('lblReadingFeatures');
+            if (featuresReading) featuresReading.innerText = t.readingFeatures;
+
+            document.getElementById('lblArchScoreTitle').innerText = t.archScoreTitle;
+            
+            const recalcBtn = document.getElementById('recalcScoreBtn');
+            if (recalcBtn.innerText !== 'Calculating...' && recalcBtn.innerText !== 'جاري الحساب...') {
+                recalcBtn.innerText = t.reevaluate;
+            }
+            
+            document.getElementById('lblBoundaryViolations').innerText = t.violations;
+            document.getElementById('lblInterfacesRatio').innerText = t.interfaces;
+            document.getElementById('lblComplexityIndex').innerText = t.complexity;
+            
+            document.getElementById('lblTechDebtTitle').innerText = t.techDebtTitle;
+            
+            const debtDesc = document.getElementById('lblDebtDescription');
+            if (debtDesc) debtDesc.innerText = t.debtDescription;
+
+            document.getElementById('lblReviewsAuditsTitle').innerText = t.reviewsAuditsTitle;
+            
+            const repairBtn = document.getElementById('repairBtn');
+            if (repairBtn.innerText !== 'Repairing...' && repairBtn.innerText !== 'جاري الإصلاح...') {
+                repairBtn.innerText = t.triggerRepair;
+            }
+
+            document.getElementById('tabBtnAudit').innerText = t.tabAudit;
+            document.getElementById('tabBtnErrors').innerText = t.tabErrors;
+            document.getElementById('tabBtnMemory').innerText = t.tabMemory;
+            document.getElementById('tabBtnHistory').innerText = t.tabHistory;
+
+            document.getElementById('lblLogStreamTitle').innerText = t.logStreamTitle;
+            document.getElementById('lblSseStream').innerText = t.sseStream;
+            document.getElementById('clearConsoleBtn').innerText = t.clear;
+            
+            const statusText = document.getElementById('statusText');
+            if (statusText) {
+                if (statusText.innerText === 'Disconnected' || statusText.innerText === 'غير متصل') {
+                    statusText.innerText = t.disconnected;
+                } else if (statusText.innerText === 'Live Feed Connected' || statusText.innerText === 'متصل بالبث المباشر') {
+                    statusText.innerText = t.connected;
+                }
+            }
+
+            const consoleReady = document.getElementById('lblConsoleReady');
+            if (consoleReady) {
+                consoleReady.innerText = currentLang === 'ar' ? 'الطرفية جاهزة. جاري الاتصال بالبث المباشر...' : 'Console ready. Establishing live socket hook...';
+            }
+        }
+
+        // EventSource (SSE) Management
+        function initWebSocket() {
+            const streamUrl = `${API_BASE}/api/logs-stream`;
+
+            try {
+                if (socket) socket.close();
+            } catch(e) {}
+
+            socket = new EventSource(streamUrl);
+
+            socket.onopen = () => {
+                document.getElementById('statusDot').className = 'status-dot connected';
+                document.getElementById('statusText').innerText = translations[currentLang].connected;
+                addConsoleLine('System', 'SUCCESS', 'Real-time SSE event stream hooked successfully!');
+            };
+
+            socket.onerror = (err) => {
+                document.getElementById('statusDot').className = 'status-dot';
+                document.getElementById('statusText').innerText = translations[currentLang].disconnected;
+                addConsoleLine('System', 'ERROR', 'SSE stream connection dropped. Retrying in 5s...');
+                socket.close();
+                setTimeout(initWebSocket, 5000);
+            };
+
+            socket.onmessage = (event) => {
+                try {
+                    const data = JSON.parse(event.data);
+                    if (data.type === 'log') {
+                        addConsoleLine(data.time, data.level, data.message);
+                    } else if (data.type === 'status_update') {
+                        fetchStatus(); // Reload files/scores on changes
+                    }
+                } catch (ex) {
+                    console.error("Error parsing stream msg:", ex);
+                }
+            };
+        }
+
+        // Add line to terminal console
+        function addConsoleLine(time, level, message) {
+            const consoleBox = document.getElementById('consoleOutput');
+            
+            const line = document.createElement('div');
+            line.className = 'log-line';
+
+            const timeSpan = document.createElement('span');
+            timeSpan.className = time.toLowerCase().includes('system') ? 'log-time-sys' : 'log-time';
+            timeSpan.innerText = time.includes(':') || time.includes('[') ? time : `[${time}]`;
+
+            const levelSpan = document.createElement('span');
+            levelSpan.className = `log-level ${level.toLowerCase()}`;
+            levelSpan.innerText = level.toUpperCase();
+
+            const msgSpan = document.createElement('span');
+            msgSpan.className = 'log-msg';
+            msgSpan.innerText = message;
+
+            line.appendChild(timeSpan);
+            line.appendChild(levelSpan);
+            line.appendChild(msgSpan);
+
+            consoleBox.appendChild(line);
+
+            // Keep scroll at bottom
+            consoleBox.scrollTop = consoleBox.scrollHeight;
+
+            // Cap console items to prevent memory bloat
+            if (consoleBox.childElementCount > 150) {
+                consoleBox.removeChild(consoleBox.firstElementChild);
+            }
+        }
+
+        // Fetch Status & Configuration
+        async function fetchStatus() {
+            try {
+                const res = await fetch(`${API_BASE}/api/status`);
+                if (!res.ok) throw new Error("API failed");
+                statusData = await res.json();
+
+                renderProjectMeta(statusData);
+                renderFeatureSwitches(statusData.activeFeatures);
+                renderScorecard(statusData.scorecard);
+                renderHeatmap(statusData.heatmap);
+                renderTabContent();
+            } catch (err) {
+                console.error("Error loading status:", err);
+                addConsoleLine('API', 'ERROR', `Failed to retrieve server configurations: ${err.message}`);
+            }
+        }
+
+        function renderProjectMeta(data) {
+            const projectPathText = data.projectPath || (currentLang === 'ar' ? "لا يوجد مشروع نشط" : "No active project");
+            document.getElementById('projectPath').innerText = projectPathText;
+            document.getElementById('projectPath').title = projectPathText;
+        }
+
+        // Render Features Switches
+        function renderFeatureSwitches(activeList) {
+            const container = document.getElementById('featuresContainer');
+            container.innerHTML = '';
+
+            const list = Array.isArray(activeList) ? activeList : [];
+
+            Object.keys(featureDetails[currentLang]).forEach(idKey => {
+                const id = parseInt(idKey);
+                const isChecked = list.includes(id);
+
+                const item = document.createElement('div');
+                item.className = 'feature-item';
+
+                item.innerHTML = `
+                    <div class="feature-info">
+                        <span class="feature-name">[${id}] ${featureDetails[currentLang][id].name}</span>
+                        <span class="feature-desc">${featureDetails[currentLang][id].desc}</span>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="chk-${id}" ${isChecked ? 'checked' : ''} onchange="toggleFeature(${id})">
+                        <span class="slider"></span>
+                    </label>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        // Handle Feature Toggling
+        async function toggleFeature(id) {
+            if (!statusData) return;
+
+            const checkboxes = Array.from(document.querySelectorAll('[id^="chk-"]'));
+            const enabledIds = checkboxes
+                .filter(chk => chk.checked)
+                .map(chk => parseInt(chk.id.split('-')[1]));
+
+            addConsoleLine('Settings', 'INFO', `Updating active modules list: ${enabledIds.join(',')}`);
+
+            try {
+                const res = await fetch(`${API_BASE}/api/features`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(enabledIds)
+                });
+                if (!res.ok) throw new Error("Failed to save settings");
+                
+                statusData.activeFeatures = enabledIds;
+                addConsoleLine('Settings', 'SUCCESS', `Active features successfully applied!`);
+            } catch (err) {
+                addConsoleLine('Settings', 'ERROR', `Failed to apply settings: ${err.message}`);
+                // Revert
+                fetchStatus();
+            }
+        }
+
+        // Render Scorecard
+        function renderScorecard(card) {
+            const scoreVal = document.getElementById('scoreValue');
+            const circle = document.getElementById('scoreCircle');
+
+            if (!card || !card.score) {
+                scoreVal.innerText = '--';
+                circle.style.background = `rgba(255,255,255,0.05)`;
+                return;
+            }
+
+            const total = parseInt(card.score);
+            const violations = card.violationsCount ?? 0;
+            const interfaces = card.interfacesRatio ?? '0%';
+            let complexity = card.complexityIndex ?? 'Normal';
+            if (currentLang === 'ar') {
+                if (complexity === 'Normal') complexity = 'طبيعي';
+                else if (complexity === 'Low') complexity = 'منخفض';
+                else if (complexity === 'High') complexity = 'مرتفع';
+            }
+
+            // Grade styling
+            let grade = 'F';
+            let color = 'var(--accent-rose)';
+            if (total >= 90) { grade = 'A+'; color = 'var(--accent-green)'; }
+            else if (total >= 80) { grade = 'A'; color = 'var(--accent-cyan)'; }
+            else if (total >= 70) { grade = 'B'; color = 'var(--accent-indigo)'; }
+            else if (total >= 60) { grade = 'C'; color = 'var(--accent-yellow)'; }
+
+            scoreVal.innerText = grade;
+            scoreVal.style.color = color;
+            scoreVal.style.textShadow = `0 0 15px ${color}`;
+
+            // Set conic gradient
+            const angle = (total / 100) * 360;
+            circle.style.background = `conic-gradient(${color} 0deg, ${color} ${angle}deg, rgba(255,255,255,0.05) ${angle}deg)`;
+
+            document.getElementById('valViolations').innerText = violations;
+            document.getElementById('valInterfaces').innerText = interfaces;
+            document.getElementById('valComplexity').innerText = complexity;
+        }
+
+        // Render Heatmap
+        function renderHeatmap(heatmap) {
+            const container = document.getElementById('heatmapContainer');
+            container.innerHTML = '';
+
+            const layers = (heatmap && typeof heatmap === 'object') ? heatmap : {
+                'Domain': 15,
+                'Application': 30,
+                'Infrastructure': 55,
+                'WebAPI': 40
+            };
+
+            const layerNames = {
+                en: { 'Domain': 'Domain Layer', 'Application': 'Application Layer', 'Infrastructure': 'Infrastructure Layer', 'WebAPI': 'API / Presentation Layer' },
+                ar: { 'Domain': 'طبقة النطاق (Domain)', 'Application': 'طبقة التطبيق (Application)', 'Infrastructure': 'طبقة البنية التحتية (Infrastructure)', 'WebAPI': 'طبقة العرض والـ API' }
+            };
+
+            Object.keys(layers).forEach(layer => {
+                const score = parseInt(layers[layer]);
+                let colorClass = '';
+                if (score >= 70) colorClass = 'danger';
+                else if (score >= 40) colorClass = 'warning';
+
+                const barGroup = document.createElement('div');
+                barGroup.className = 'heatmap-bar-group';
+
+                const layerDisplayName = layerNames[currentLang][layer] || `${layer} Layer`;
+                const complexityText = currentLang === 'ar' ? `تعقيد بنسبة ${score}%` : `${score}% complexity`;
+
+                barGroup.innerHTML = `
+                    <div class="heatmap-label-row">
+                        <span class="heatmap-layer-name">${layerDisplayName}</span>
+                        <span class="heatmap-layer-score">${complexityText}</span>
+                    </div>
+                    <div class="heatmap-bar-bg">
+                        <div class="heatmap-bar-fill ${colorClass}" style="width: ${score}%"></div>
+                    </div>
+                `;
+                container.appendChild(barGroup);
+            });
+        }
+
+        // Recalculate Score
+        async function recalculateScore() {
+            const t = translations[currentLang];
+            addConsoleLine('Scorecard', 'INFO', t.promptScorecardInfo);
+            const btn = document.getElementById('recalcScoreBtn');
+            btn.disabled = true;
+            btn.innerText = t.reevaluating;
+
+            try {
+                const res = await fetch(`${API_BASE}/api/score`, { method: 'POST' });
+                if (!res.ok) throw new Error("Calculation failed");
+                const card = await res.json();
+                
+                statusData.scorecard = card;
+                renderScorecard(card);
+                if (card.heatmap) {
+                    statusData.heatmap = card.heatmap;
+                    renderHeatmap(card.heatmap);
+                }
+                const successMsg = t.promptScorecardSuccess.replace('{score}', card.score);
+                addConsoleLine('Scorecard', 'SUCCESS', successMsg);
+            } catch (err) {
+                const errorMsg = t.promptScorecardError.replace('{err}', err.message);
+                addConsoleLine('Scorecard', 'ERROR', errorMsg);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = t.reevaluate;
+            }
+        }
+
+        // Trigger Autonomous Repair
+        async function triggerRepair() {
+            const t = translations[currentLang];
+            if (!confirm(t.confirmRepair)) {
+                return;
+            }
+
+            addConsoleLine('Repair', 'INFO', t.promptRepairInfo);
+            const btn = document.getElementById('repairBtn');
+            btn.disabled = true;
+            btn.innerText = t.repairing;
+
+            try {
+                const res = await fetch(`${API_BASE}/api/fix`, { method: 'POST' });
+                if (!res.ok) throw new Error("Trigger request failed");
+                addConsoleLine('Repair', 'SUCCESS', t.promptRepairSuccess);
+            } catch (err) {
+                const errorMsg = t.promptRepairError.replace('{err}', err.message);
+                addConsoleLine('Repair', 'ERROR', errorMsg);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = t.triggerRepair;
+            }
+        }
+
+        // Tabs Navigation & Rendering
+        function switchTab(tabName) {
+            activeTab = tabName;
+            
+            const buttons = document.querySelectorAll('.tab-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+
+            // Set clicked button active
+            event.target.classList.add('active');
+
+            renderTabContent();
+        }
+
+        function renderTabContent() {
+            const output = document.getElementById('markdownOutput');
+            if (!statusData) {
+                output.innerText = currentLang === 'ar' ? 'جاري تحميل بيانات الخادم...' : 'Server data loading...';
+                return;
+            }
+
+            if (activeTab === 'errors') {
+                renderActiveViolations(statusData.codeErrors);
+                return;
+            }
+
+            let mdText = '';
+            if (activeTab === 'audit') {
+                mdText = statusData.auditReport || (currentLang === 'ar' ? "*لم يتم توليد تقرير تدقيق المشروع بعد.*" : "*No Project Audit report generated yet.*");
+            } else if (activeTab === 'memory') {
+                mdText = statusData.customContext ? `\`\`\`json\n${statusData.customContext}\n\`\`\`` : (currentLang === 'ar' ? "*لم يتم العثور على ملف قواعد سياق الذكاء الاصطناعي `.ai/context.json` في جذر المشروع.*" : "*No `.ai/context.json` context rules file detected in project root.*");
+            } else if (activeTab === 'history') {
+                mdText = statusData.modificationsLog || (currentLang === 'ar' ? "*لم يتم تسجيل أي تعديلات بعد.*" : "*No modification records logged yet.*");
+            }
+
+            output.innerHTML = parseMarkdown(mdText);
+        }
+
+        function renderActiveViolations(mdText) {
+            const output = document.getElementById('markdownOutput');
+            const t = translations[currentLang];
+            if (!mdText || mdText.trim() === "" || mdText.includes("*No active code violations") || mdText.includes("*لم يتم اكتشاف")) {
+                output.innerHTML = `<div style="text-align: center; color: var(--accent-green); padding: 30px; font-size: 14px;">
+                    <span style="font-size: 24px; display: block; margin-bottom: 10px;">✅</span>
+                    ${t.noViolations}
+                </div>`;
+                return;
+            }
+
+            const blocks = mdText.split(/\n---\s*\n/);
+            let html = '<div class="violations-list" style="display: flex; flex-direction: column; gap: 20px;">';
+
+            let count = 0;
+            blocks.forEach(block => {
+                if (!block.trim() || block.includes("AI Code Errors & Syntax Solutions Log") || block.includes("سجل أخطاء")) return;
+
+                const fileMatch = block.match(/## Error in\s+(.+)/) || block.match(/## خطأ في\s+(.+)/);
+                if (!fileMatch) return;
+                const filePath = fileMatch[1].trim();
+
+                const detailsMatch = block.match(/-\s+\*\*Details:\*\*\s*(.+)/) || block.match(/-\s+\*\*التفاصيل:\*\*\s*(.+)/);
+                const details = detailsMatch ? detailsMatch[1].trim() : (currentLang === 'ar' ? "عرض التفاصيل أدناه" : "View details below");
+
+                const capturedMatch = block.match(/-\s+\*\*Captured At:\*\*\s*(.+)/) || block.match(/-\s+\*\*التقطت في:\*\*\s*(.+)/);
+                const capturedAt = capturedMatch ? capturedMatch[1].trim() : "";
+
+                const linesMatch = block.match(/-\s+\*\*Lines:\*\*\s*(.+)/) || block.match(/-\s+\*\*الأسطر:\*\*\s*(.+)/);
+                const lines = linesMatch ? linesMatch[1].trim() : "";
+
+                const codeMatch = block.match(/```csharp([\s\S]*?)```/);
+                const codeFix = codeMatch ? codeMatch[1].trim() : "";
+
+                count++;
+
+                const capturedLabel = currentLang === 'ar' ? 'التقطت في: ' : 'Captured: ';
+                const linesLabel = currentLang === 'ar' ? 'الأسطر: ' : 'Lines: ';
+                const issueHeader = currentLang === 'ar' ? 'المشكلة:' : 'Issue:';
+
+                html += `
+                    <div class="violation-card" style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 8px; padding: 16px; position: relative; transition: all 0.3s ease;">
+                        <div class="violation-header" style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 12px; flex-wrap: wrap;">
+                            <span class="file-path-badge" style="background: rgba(239, 68, 68, 0.1); color: var(--accent-rose); font-family: 'Fira Code', monospace; font-size: 12px; padding: 4px 10px; border-radius: 4px; border: 1px solid rgba(239, 68, 68, 0.2);">${filePath}</span>
+                            <span style="font-size: 11px; color: var(--text-secondary);">${capturedAt ? capturedLabel + capturedAt : ''} ${lines ? '| ' + linesLabel + lines : ''}</span>
+                        </div>
+                        <div class="violation-details" style="color: var(--text-primary); font-size: 13px; margin-bottom: 12px; line-height: 1.5;">
+                            <strong>${issueHeader}</strong> ${details}
+                        </div>
+                        ${codeFix ? `
+                            <div class="code-fix-container" style="margin-bottom: 16px;">
+                                <div style="font-size: 11px; color: var(--accent-cyan); font-family: 'Fira Code', monospace; margin-bottom: 4px;">${t.proposedCsFix}</div>
+                                <pre style="background: var(--pre-bg); padding: 12px; border-radius: 6px; font-family: 'Fira Code', monospace; font-size: 12px; overflow-x: auto; margin: 0; border: 1px solid var(--glass-border); color: var(--pre-color);"><code style="background:transparent; padding:0; color:inherit;">${escapeHtml(codeFix)}</code></pre>
+                            </div>
+                        ` : ''}
+                        <button onclick="applyFix('${escapeJs(filePath)}', '${escapeJs(details)}', this)" class="action-btn" style="background: linear-gradient(135deg, var(--accent-green) 0%, #059669 100%); color: white; border: none; font-size: 12px; padding: 6px 14px; border-radius: 4px; cursor: pointer; transition: all 0.2s ease;">
+                            ${t.applyProposedFix}
+                        </button>
+                    </div>
+                `;
+            });
+
+            html += '</div>';
+
+            if (count === 0) {
+                output.innerHTML = parseMarkdown(mdText);
+            } else {
+                output.innerHTML = html;
+            }
+        }
+
+        function escapeHtml(str) {
+            return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        }
+
+        function escapeJs(str) {
+            return str.replace(/'/g, "\\'").replace(/"/g, '\\"').replace(/\n/g, '\\n');
+        }
+
+        async function applyFix(filePath, details, button) {
+            const t = translations[currentLang];
+            if (!confirm(t.confirmFix.replace('{file}', filePath))) {
+                return;
+            }
+
+            const originalText = button.innerText;
+            button.disabled = true;
+            button.innerText = t.applying;
+            addConsoleLine('Repair', 'INFO', `Sending targeted C# fix request for ${filePath}...`);
+
+            try {
+                const res = await fetch(`${API_BASE}/api/apply-fix`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ filePath, details })
+                });
+
+                if (!res.ok) {
+                    const errText = await res.text();
+                    throw new Error(errText || "Apply fix failed");
+                }
+
+                addConsoleLine('Repair', 'SUCCESS', `C# fix successfully applied to ${filePath}!`);
+                alert(t.fixApplied.replace('{file}', filePath));
+                fetchStatus();
+            } catch (err) {
+                addConsoleLine('Repair', 'ERROR', `Failed to apply fix to ${filePath}: ${err.message}`);
+                alert(t.fixFailed.replace('{err}', err.message));
+            } finally {
+                button.disabled = false;
+                button.innerText = originalText;
+            }
+        }
+
+        // Simple Markdown Parser (Strictly client-side without external dependencies)
+        function parseMarkdown(md) {
+            if (!md) return '';
+            
+            let html = md
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;');
+
+            // Blockquotes
+            const impLabel = currentLang === 'ar' ? '💡 هام:' : '💡 IMPORTANT:';
+            const warnLabel = currentLang === 'ar' ? '⚠️ تحذير:' : '⚠️ WARNING:';
+            const noteLabel = currentLang === 'ar' ? 'ℹ️ ملاحظة:' : 'ℹ️ NOTE:';
+
+            html = html.replace(/^\s*&gt;\s*\[!IMPORTANT\]\s*\n([\s\S]*?)(?=\n\n|\n\s*&gt;\s*|&lt;blockquote&gt;|$)/gm, `<blockquote><strong>${impLabel}</strong><br>$1</blockquote>`);
+            html = html.replace(/^\s*&gt;\s*\[!WARNING\]\s*\n([\s\S]*?)(?=\n\n|\n\s*&gt;\s*|&lt;blockquote&gt;|$)/gm, `<blockquote><strong>${warnLabel}</strong><br>$1</blockquote>`);
+            html = html.replace(/^\s*&gt;\s*\[!NOTE\]\s*\n([\s\S]*?)(?=\n\n|\n\s*&gt;\s*|&lt;blockquote&gt;|$)/gm, `<blockquote><strong>${noteLabel}</strong><br>$1</blockquote>`);
+            html = html.replace(/^\s*&gt;\s*(.*?)(?=\n\n|\n\s*&gt;\s*|&lt;blockquote&gt;|$)/gm, '<blockquote>$1</blockquote>');
+
+            // Fenced code blocks
+            html = html.replace(/```(.*?)\n([\s\S]*?)```/g, '<pre><code class="language-$1">$2</code></pre>');
+
+            // Inline code
+            html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+
+            // Headers
+            html = html.replace(/^### (.*?)$/gm, '<h3>$1</h3>');
+            html = html.replace(/^## (.*?)$/gm, '<h2>$1</h2>');
+            html = html.replace(/^# (.*?)$/gm, '<h1>$1</h1>');
+
+            // Strong
+            html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+
+            // List items
+            html = html.replace(/^\s*[\-\*]\s+(.*?)$/gm, '<li>$1</li>');
+
+            // Paragraph new lines
+            html = html.replace(/\n\n/g, '<br><br>');
+
+            return html;
+        }
+    </script>
+</body>
+</html>
